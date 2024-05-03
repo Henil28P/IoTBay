@@ -28,7 +28,8 @@ app.use(bodyParser.urlencoded({
 }))
 
 // Connect to MongoDB IoTBay Database
-mongoose.connect("mongodb://localhost:27017/IoTBay");
+// mongoose.connect("mongodb://localhost:27017/IoTBay");
+mongoose.connect("mongodb://0.0.0.0:27017/IoTBay"); // use the above if this one does not work
 
 const db = mongoose.connection;
 
@@ -133,19 +134,26 @@ app.post("/register", (req, res) => {
     var name = req.body.name;
     var email = req.body.email;
     var password = req.body.password;
-
-    var data = {
-        "name": name,
-        "email": email,
-        "password": password
-    }
-
-    db.collection('Users').insertOne(data,(err,collection)=>{
-        if(err)
-        {
-            throw err;
+    
+    // 03/05 - bcrypt.compare converts plaintext to hash, hence we have to store the hashed 
+    //         password into the database and use it to compare
+    bcrypt.hash(password, 10, function(err, hash) {
+        if (err) { throw (err); }
+        var data = {
+            "name": name,
+            "email": email,
+            "password": password,
+            "hashed": hash
         }
-        console.log("Record inserted successfully");
+        
+        db.collection('Users').insertOne(data,(err,collection)=>{
+            if(err)
+            {
+                throw err;
+            }
+            console.log("Record inserted successfully");
+            
+        });
     });
 
     res.redirect('/login'); // once data is inserted into the mongodb, redirect user to index.ejs page
@@ -165,33 +173,35 @@ app.post("/login", async (req, res) => {
     // Assuming successful login, generate JWT token:
     // res.render('view/index');
     const { email, password } = req.body;
-    const check = await collection.findOne({ email });
+    const check = await db.collection('Users').findOne({ email });
     
     try {
         // console.log(check);
         if (!check)
         {
             // res.render('index.ejs');
-            return res.send("Incorrect email")
+            return res.send("Incorrect email");
         }
-        else {
-            res.send("Incorrect Password, please try again!");
-        }
-        // if(!check)
-        // {
-        //     res.send("user name not found");
+
+        // 03/05 - This additional check is causing it to not proceed any further
+        // Error [ERR_HTTP_HEADERS_SENT]: Cannot set headers after they are sent to the client
+        // else {
+        //     res.send("Incorrect Password, please try again!");
         // }
-        const isPasswordMatch = await bcrypt.compare(password, check.password);
+        
+        const isPasswordMatch = await bcrypt.compare(password, check.hashed);
+
         if (isPasswordMatch)
         {
             res.render("index");
         }
         else
         {
-            req.send("wrong password");
+            res.send("wrong password");
         }
     }
     catch (error) {
+        console.log(error)
         return res.send("Wrong Details provided");
     }
 
