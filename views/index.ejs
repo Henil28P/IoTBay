@@ -1,158 +1,19 @@
+<!-- views/index.ejs -->
 <!DOCTYPE html>
-<html lang="en" class="h-100">
+<html lang="en">
 <head>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0-beta1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-0evHe/X+R7YkIZDRvuzKMRqM+OrBnVFBL6DOitfPri4tjfHxaWutUpFmBp4vmVor" crossorigin="anonymous">
-    <link rel="shortcut icon" type="image/png" href="https://www.pngkey.com/png/detail/18-182164_website-symbol-png-clip-art-black-and-white.png">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Index</title>
 
-    <style>
-        body {
-            background: url(https://images.unsplash.com/photo-1538947117537-48239ec91f18?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D);
-            background-size: cover;
-            background-position: center;
-        }
+    <!-- Local Files -->
+    <link rel="stylesheet" href="/css/styles.css" type="text/css">
 
-        .iot-product {
-            width: 200px;
-            height: 200px;
-            background-color: #f8f9fa;
-            margin: 10px;
-            display: inline-block;
-            position: relative;
-            border-radius: 10px;
-        }
-
-        .product-image {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-            border-radius: 10px;
-        }
-
-        .add-to-cart {
-            position: absolute;
-            bottom: 10px;
-            width: 110px;
-            left: 50%;
-            transform: translateX(-50%);
-        }
-
-        .header {
-            background-color: white;
-            width: 100%;
-            padding: 10px;
-            position: fixed;
-            top: 0;
-            left: 0;
-            z-index: 1000;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .container {
-            margin-top: -40px; 
-        }
-
-        .search-icon {
-            width: 30px; 
-            height: auto; 
-            margin-left: 5px; 
-            margin-right: 15px;
-        }
-
-        .custom-btn {
-            width: 90px; 
-            margin-right: 10px; 
-        }
-
-        /* Added CSS for vertical centering */
-        .logout-container {
-            display: flex;
-            align-items: center;
-        }
-    </style>
+    <!-- Libraries -->
 
 </head>
-<body class="d-flex h-100 text-center text-white bg-white">
-<div class="container d-flex w-100 h-100 p-3 mx-auto flex-column">
-    <header class="mb-auto">
-        <div class="header">
-            <div>
-                <!-- Logo -->
-                <img src="https://i.postimg.cc/wvZDbKXP/Io-TBay-Black.png" border="0" alt="Iot-Bay-white" width="120"/>
-            </div>
-            <h1 class="text-dark" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);">Hello <%= name || 'Guest' %> </h1>
-            <div class="nav">
-                <!-- Buttons -->
-                <a class="nav-link" href="#">Browse Catalogue</a>
-                <a class="nav-link" href="#">Orders</a>
-                <div class="d-flex align-items-center">
-                    <a class="nav-link" href="#">Search</a>
-                    <img src="https://cdn-icons-png.flaticon.com/512/263/263142.png" alt="Search Icon" class="search-icon">
-                </div>
-                <div class="logout-container">
-                    <form action="/logout?_method=DELETE" method="POST">
-                        <button class="nav-link fw-bold py-1 px-0 btn p=3 btn-primary text-white custom-btn" type="submit">Logout</button>
-                    </form>
-                </div>
-            </div>
-        </div>
-        
-    </header>
-
-    <main id="products-container" class="px-3 d-flex justify-content-center align-items-center flex-wrap" style="height: calc(100vh - 120px);">
-    </main>
-</div>
-
-<script>
-    document.addEventListener("DOMContentLoaded", function() {
-        const productsContainer = document.getElementById("products-container");
-
-        // Array of product images
-        const productImages = [
-            "https://via.placeholder.com/200",
-            "https://via.placeholder.com/200",
-            "https://via.placeholder.com/200",
-            "https://via.placeholder.com/200",
-            "https://via.placeholder.com/200",
-            "https://via.placeholder.com/200",
-            "https://via.placeholder.com/200",
-            "https://via.placeholder.com/200",
-            "https://via.placeholder.com/200",
-            "https://via.placeholder.com/200",
-            "https://via.placeholder.com/200",
-            "https://via.placeholder.com/200",
-            "https://via.placeholder.com/200",
-            "https://via.placeholder.com/200",
-            "https://via.placeholder.com/200",
-            "https://via.placeholder.com/200",
-            "https://via.placeholder.com/200",
-            "https://via.placeholder.com/200",
-            "https://via.placeholder.com/200",
-            "https://via.placeholder.com/200",
-            
-        ];
-
-        // Generate products
-        productImages.forEach(imageUrl => {
-            const productDiv = document.createElement("div");
-            productDiv.classList.add("iot-product");
-
-            const productImage = document.createElement("img");
-            productImage.classList.add("product-image");
-            productImage.src = imageUrl;
-            productImage.alt = "Product";
-
-            const addToCartButton = document.createElement("button");
-            addToCartButton.classList.add("add-to-cart", "btn", "btn-primary");
-            addToCartButton.textContent = "Add to Cart";
-
-            productDiv.appendChild(productImage);
-            productDiv.appendChild(addToCartButton);
-
-            productsContainer.appendChild(productDiv);
-        });
-    });
-</script>
+<body>
+  <!-- JS Scripts-->
+  <script src="/js/login.js"></script>
 </body>
 </html>

@@ -1,26 +1,22 @@
 {
-  "name": "userauth",
+  "name": "iotbay",
   "version": "1.0.0",
-  "description": "",
+  "description": "This IoTBay Repository is used to synchronize and manage the assignment software code for the IoTBay project.",
   "main": "index.js",
   "scripts": {
-    "devStart": "nodemon server.js",
+    "test": "echo \"Error: no test specified\" && exit 1",
     "start": "nodemon server.js"
   },
+  "keywords": [],
   "author": "",
   "license": "ISC",
-  "dependencies": {
-    "bcrypt": "^5.1.1",
-    "ejs": "^3.1.8",
-    "express": "^4.18.1",
-    "express-flash": "^0.0.2",
-    "express-session": "^1.17.3",
-    "method-override": "^3.0.0",
-    "passport": "^0.6.0",
-    "passport-local": "^1.0.0"
-  },
   "devDependencies": {
-    "dotenv": "^16.4.5",
-    "nodemon": "^2.0.18"
+    "nodemon": "^3.1.0"
+  },
+  "dependencies": {
+    "ejs": "^3.1.9",
+    "express": "^4.19.2",
+    "mongodb": "^6.6.1",
+    "mongoose": "^8.3.4"
   }
 }
