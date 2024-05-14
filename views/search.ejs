@@ -1,0 +1,44 @@
+<!-- views/search.ejs -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Search Results</title>
+    <!-- Local Files -->
+    <link rel="stylesheet" href="css/styles.css" type="text/css">
+</head>
+<body>
+  <h1>Search Results</h1>
+  <div class="navbar">
+    <a href="/index">Home Page</a>
+    <div class="search-container">
+      <form action="/search" method="get">
+        <input type="text" placeholder="Search..." name="search">
+        <button type="submit">Search</button>
+      </form>
+    </div>
+    <a href="/login">Login/Signup</a>
+    <a href="/cart">Cart</a>
+  </div>
+  <ul>
+    <% searchResults.forEach(product => { %>
+      <li>
+        <h2><%= product.DeviceName %></h2>
+        <p>Manufacturer: <%= product.DeviceManufacturer %></p>
+        <p>Price: $<%= product.DevicePrice %></p>
+        <p>Description: <%= product.DeviceDescription %></p>
+        <p>Category: <%= product.DeviceCategory %></p>
+        <p>Quantity: <%= product.DeviceStock %></p>
+        <form action="/addToCart" method="post">
+          <input type="hidden" name="productId" value="<%= product._id %>">
+          <input type="number" name="quantity" value="1" min="1">
+          <button type="submit">Add to Cart</button>
+        </form>
+      </li>
+    <% }) %>
+  </ul>
+  <!-- JS Scripts-->
+  <script src="/js/login.js"></script>
+</body>
+</html>

@@ -46,6 +46,7 @@ async function connectToDB() {
       next();
     });
     app.use(bodyParser.urlencoded({ extended: false })); // Parse JSON bodies
+    app.use(bodyParser.json());
 
     // Fetch all products
     const products = await ProductsCollection.find({}).toArray();
@@ -217,6 +218,17 @@ async function connectToDB() {
     console.error('Error processing payment:', error);
     res.status(500).send('Error processing payment');
   }
+  });
+// Add a route for handling search queries
+  app.get('/search', async (req, res) => {
+    try {
+      const searchTerm = req.query.search;
+      const searchResults = await ProductsCollection.find({ DeviceName: new RegExp(searchTerm, 'i') }).toArray();
+      res.render('search', { searchResults });
+    } catch (error) {
+      console.error('Error in search:', error);
+      res.status(500).send('Error in search');
+    }
   });
 
     // Start server
