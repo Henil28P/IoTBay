@@ -115,14 +115,21 @@ async function connectToDB() {
     });
 
     // Example: Update product stock
-    const productId = '664069cc770992bdb835a03e'; // Example product ID
-    const filter = { _id: new ObjectId(productId) };
-    const update = { $set: { DeviceStock: 10-1 } }; // Example update
-    try {
-        const result = await ProductsCollection.updateOne(filter, update);
-        console.log(`${result.modifiedCount} document(s) updated`);
-    } catch (error) {
-        console.error('Error updating product:', error);
+    const productsid = await ProductsCollection.find({}, { _id: 1 }).toArray();
+    const productIds = productsid.map(product => product._id.toString());
+    console.log("Product IDs:", productIds);
+
+    if(productIds.includes("664069cc770992bdb835a03e")){
+      console.log("Stock updated");
+      const productId = '664069cc770992bdb835a03e'; // Example product ID
+      const filter = { _id: new ObjectId(productId) };
+      const update = { $set: { DeviceStock: 10-3 } }; // Example update
+      try {
+          const result = await ProductsCollection.updateOne(filter, update);
+          console.log(`${result.modifiedCount} document(s) updated`);
+      } catch (error) {
+          console.error('Error updating product:', error);
+      }
     }
 
     // Start server
