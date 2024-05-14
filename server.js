@@ -1,6 +1,6 @@
 const express = require('express');
 const bodyParser = require('body-parser');
-const { MongoClient } = require('mongodb');
+const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 const session = require('express-session');
 const cookieParser = require('cookie-parser');
 
@@ -11,8 +11,11 @@ const uri = "mongodb+srv://Juhil:LOcRO08NWfCAoGib@iotbay.w6qgafn.mongodb.net/?re
 
 // Create a new MongoClient
 const client = new MongoClient(uri, {
-  useNewUrlParser: true,
-  useUnifiedTopology: true,
+  serverApi: {
+    version: ServerApiVersion.v1,
+    strict: true,
+    deprecationErrors: true,
+  }
 });
 
 // Connect to MongoDB
@@ -44,9 +47,11 @@ async function connectToDB() {
     app.use(bodyParser.urlencoded({ extended: false }));
     app.use(bodyParser.json());
 
+    // Fetch all products
     const products = await ProductsCollection.find({}).toArray();
 
     // Routes
+    // Render index page with products
     app.get('/', (req, res) => {
       try {
         res.render('index', { products });
@@ -56,6 +61,7 @@ async function connectToDB() {
       }
     });
 
+    // Alias route for index
     app.get('/index', (req, res) => {
       try {
         res.render('index', { products });
@@ -65,6 +71,7 @@ async function connectToDB() {
       }
     });
 
+    // Render login page
     app.get('/login', function(req, res){
       try {
         res.render('login');
@@ -74,6 +81,7 @@ async function connectToDB() {
       }
     });
 
+    // Render cart page with session cart data
     app.get('/cart', function(req, res){
       try {
         res.render('cart', { cart: req.session.cart });
@@ -83,6 +91,7 @@ async function connectToDB() {
       }
     });
 
+    // Handle login post request
     app.post('/login', async (req, res) => {
       const { username, password } = req.body;
       const user = await usersCollection.findOne({ username, password });
@@ -104,6 +113,17 @@ async function connectToDB() {
       req.session.cart[productId] = (req.session.cart[productId] || 0) + 1;
       res.redirect('/');
     });
+
+    // Example: Update product stock
+    const productId = '664069cc770992bdb835a03e'; // Example product ID
+    const filter = { _id: new ObjectId(productId) };
+    const update = { $set: { DeviceStock: 10-1 } }; // Example update
+    try {
+        const result = await ProductsCollection.updateOne(filter, update);
+        console.log(`${result.modifiedCount} document(s) updated`);
+    } catch (error) {
+        console.error('Error updating product:', error);
+    }
 
     // Start server
     const port = process.env.PORT || 3000;
