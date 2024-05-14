@@ -194,19 +194,29 @@ async function connectToDB() {
   });
 
   app.post('/processPayment', async (req, res) => {
-    // Process payment logic goes here
-    // Retrieve payment information from req.body (e.g., cardNumber, expiryDate, cvv)
-    // Validate payment information
-    // If payment is successful, clear the cart and set a success message
-    // If payment fails, set an error message
-    const paymentSuccess = true; // Example: Set to true if payment is successful
+    try {
+    const paymentSuccess = true;
     if (paymentSuccess) {
+        // Reduce stock from MongoDB for each product in the cart
+        const cart = req.session.cart;
+        for (const productId in cart) {
+            const quantity = cart[productId];
+            const product = await ProductsCollection.findOne({ _id: new ObjectId(productId) });
+            if (product) {
+                const updatedStock = product.DeviceStock - quantity;
+                await ProductsCollection.updateOne({ _id: new ObjectId(productId) }, { $set: { DeviceStock: updatedStock } });
+            }
+        }
         req.session.cart = {}; // Clear the cart
         req.session.paymentMessage = 'Payment processed successfully!';
     } else {
         req.session.paymentMessage = 'Payment failed. Please try again.';
     }
     res.redirect('/payment');
+  }catch (error) {
+    console.error('Error processing payment:', error);
+    res.status(500).send('Error processing payment');
+  }
   });
 
     // Start server
