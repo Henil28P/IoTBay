@@ -100,9 +100,8 @@ async function connectToDB() {
       if (!user) {
         res.send('Invalid username or password');
       } else {
-        res.render('dashboard', {
-          username: user.username
-        });
+        req.session.userId = user._id;
+        res.redirect('/dashboard');
       }
     });
 
@@ -228,6 +227,22 @@ async function connectToDB() {
     } catch (error) {
       console.error('Error in search:', error);
       res.status(500).send('Error in search');
+    }
+  });
+
+  app.get('/dashboard', async (req, res) => {
+    try {
+      const userId = req.session.userId; // Assuming you store user ID in session after login
+      const user = await usersCollection.findOne({ _id: new ObjectId(userId) });; // Find user based on ID
+      
+      if (!user) {
+        res.status(404).send('User not found');
+        return;
+      }
+      res.render('dashboard', { user }); // Pass user object to the template
+    } catch (error) {
+      console.error('Error in fetching user data:', error);
+      res.status(500).send('Error in fetching user data');
     }
   });
 
