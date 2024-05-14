@@ -24,10 +24,34 @@
     <a href="/login">Login/Signup</a>
     <a href="/cart">Cart</a>
   </div>
-    <ul>
-        <% Object.entries(cart).forEach(([productId, quantity]) => { %>
-            <li>Product ID: <%= productId %>, Quantity: <%= quantity %></li>
-        <% }); %>
-    </ul>
+    <div>
+      <h1>Cart</h1>
+      <% if (cart && Object.keys(cart).length > 0) { %>
+        <ul>
+          <% let totalPrice = 0; %>
+          <% Object.entries(cart).forEach(([productId, quantity]) => { %>
+            <% const product = products.find(prod => prod._id.toString() === productId); %>
+            <% if (product) { %>
+              <% const productPrice = product.DevicePrice * quantity; %>
+              <li>
+                <p>Product Name: <%= product.DeviceName %></p>
+                <p>Price: <%= product.DevicePrice %></p>
+                <p>Quantity: <%= quantity %></p>
+                <p>Total Price: $<%= productPrice %></p>
+                <% totalPrice += productPrice; %>
+                <form action="/removeFromCart" method="post">
+                  <input type="hidden" name="productId" value="<%= productId %>">
+                  <button type="submit">Remove</button>
+                </form>
+              </li>
+            <% } %>
+          <% }); %>
+        </ul>        
+        <p>Total: $<%= totalPrice %></p>
+        <a href="/payment">Payment</a>
+      <% } else { %>
+        <p>Your cart is empty.</p>
+      <% } %>
+    </div>
 </body>
 </html>
