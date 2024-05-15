@@ -28,7 +28,7 @@ app.use(bodyParser.urlencoded({
 }))
 
 // Connect to MongoDB IoTBay Database
-mongoose.connect("mongodb://localhost:27017/IoTBay");
+mongoose.connect("mongodb://0.0.0.0:27017/IoTBay"); // use the above if this one does not work
 
 const db = mongoose.connection;
 
@@ -99,6 +99,94 @@ app.get('/guest', (req, res) => {
     res.render("index.ejs", { name: 'Guest' });
 });
 
+app.get('/shipmentdetails', async (req, res) => {
+    var email = 'test1@gmail.com'
+    var data_exist = await db.collection('Shipment').findOne({ email });
+    
+    try {
+        if (data_exist){
+            console.log(data_exist)
+            // return res.send("Incorrect email");
+            var shipment_details = {
+                'address1': data_exist['address1'],
+                'address2': data_exist['address2'],
+                'postalCode': data_exist['postalCode'],
+                'city': data_exist['city']
+            };
+        }
+        else{
+            var shipment_details = null;
+        }
+        
+        res.json(shipment_details);
+    }
+    catch (error) {
+        console.log(error);
+        return res.send("ERROR OCCURRED");
+    }   
+
+});
+
+app.get('/viewshipment', async (req,res) => {
+    // HOW DO I GET THE USER EMAIL?
+    // For demo purpose, email shall be test2@gmail.com
+    // const { email, password } = req.body;
+    
+    res.render('viewShipment.ejs');
+
+});
+
+app.post('/viewshipment', (req, res) => {
+    res.redirect('/editshipment')
+});
+
+// GET route to render shipment page. Redirect to '/' if user is not authenticated
+app.get('/editshipment', checkNotAuthenticated, (req,res) => {
+    res.render('editShipment.ejs');
+});
+
+app.post('/editshipment', async (req, res) => {
+    var addr1 = req.body.address1;
+    var addr2 = req.body.address2;
+    var postalCode = req.body.postalCode;
+    var city = req.body.city;
+
+    var email = 'test2@gmail.com'
+    // console.log(addr1+addr2)
+
+    var shipment_details = {
+        "address1": addr1,
+        "address2": addr2,
+        "postalCode": postalCode,
+        "city": city,
+    }
+
+    var check = await db.collection('Shipment').findOne({ email });
+    
+    if (!check){
+        db.collection('Shipment').insertOne(shipment_details,(err,collection)=>{
+            if(err) throw err;
+            console.log("Record inserted successfully");
+        });
+    }
+    else{
+        db.collection('Shipment').updateOne(
+            {email: email}, 
+            {$set: {
+                address1: shipment_details['address1'],
+                address2: shipment_details['address2'],
+                postalCode: shipment_details['postalCode'],
+                city: shipment_details['city'],
+            }},
+              (err, res) => {
+            if (err) throw err;
+            console.log('updated')
+        });
+    }
+    res.redirect('viewshipment')
+});
+
+
 // POST route for user login. Uses Passport's local authentication strategy.
 // app.post("/login", checkNotAuthenticated, passport.authenticate("local", {
 //     successRedirect: "/",
@@ -134,18 +222,25 @@ app.post("/register", (req, res) => {
     var email = req.body.email;
     var password = req.body.password;
 
-    var data = {
-        "name": name,
-        "email": email,
-        "password": password
-    }
-
-    db.collection('Users').insertOne(data,(err,collection)=>{
-        if(err)
-        {
-            throw err;
+    // 03/05 - bcrypt.compare converts plaintext to hash, hence we have to store the hashed 
+    //         password into the database and use it to compare
+    bcrypt.hash(password, 10, function(err, hash) {
+        if (err) { throw (err); }
+        var data = {
+            "name": name,
+            "email": email,
+            "password": password,
+            "hashed": hash
         }
-        console.log("Record inserted successfully");
+        
+        db.collection('Users').insertOne(data,(err,collection)=>{
+            if(err)
+            {
+                throw err;
+            }
+            console.log("Record inserted successfully");
+            
+        });
     });
 
     res.redirect('/login'); // once data is inserted into the mongodb, redirect user to index.ejs page
@@ -165,33 +260,35 @@ app.post("/login", async (req, res) => {
     // Assuming successful login, generate JWT token:
     // res.render('view/index');
     const { email, password } = req.body;
-    const check = await collection.findOne({ email });
+    const check = await db.collection('Users').findOne({ email });
     
     try {
         // console.log(check);
         if (!check)
         {
             // res.render('index.ejs');
-            return res.send("Incorrect email")
+            return res.send("Incorrect email");
         }
-        else {
-            res.send("Incorrect Password, please try again!");
-        }
-        // if(!check)
-        // {
-        //     res.send("user name not found");
+
+        // 03/05 - This additional check is causing it to not proceed any further
+        // Error [ERR_HTTP_HEADERS_SENT]: Cannot set headers after they are sent to the client
+        // else {
+        //     res.send("Incorrect Password, please try again!");
         // }
-        const isPasswordMatch = await bcrypt.compare(password, check.password);
+        
+        const isPasswordMatch = await bcrypt.compare(password, check.hashed);
+
         if (isPasswordMatch)
         {
             res.render("index");
         }
         else
         {
-            req.send("wrong password");
+            res.send("wrong password");
         }
     }
     catch (error) {
+        console.log(error)
         return res.send("Wrong Details provided");
     }
 
