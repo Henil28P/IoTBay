@@ -10,6 +10,11 @@ require("dotenv").config();
 const express = require("express"); // "express" is a web framework for Node.js
 const app = express();
 app.set('view engine', 'ejs');
+
+// 17/05
+// so i can use css or js
+app.use(express.static(__dirname + '/public'));
+
 const mongoose = require("mongoose");
 const bodyParser = require("body-parser");
 const bcrypt = require("bcrypt"); // "bcrypt" is a library for hashing passwords
@@ -19,13 +24,29 @@ const initializePassport = require("./passport-config");
 const flash = require("express-flash"); // "flash" is a middleware for displaying flash messages.
 const session = require("express-session"); // "session" is a middleware for managing user sessions.
 const methodOverride = require("method-override"); // "methodOverride" is a middleware for HTTP method overriding
+const cookieParser = require("cookie-parser")
+
+// Middleware to check if the user is authenticated
+const authenticateUser = (req, res, next) => {
+    const loggedIn = req.cookies.loggedIn;
+
+    if (loggedIn) {
+        // User is authenticated, proceed to next middleware or route handler
+        next();
+    } else {
+        // User is not authenticated, redirect to login page or send unauthorized response
+        res.status(401).json({ message: 'Unauthorized' });
+    }
+};
 
 const MONGOURL = process.env.MONGO_URL;
+
 
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({
     extended:true
 }))
+app.use(cookieParser());
 
 // Connect to MongoDB IoTBay Database
 mongoose.connect("mongodb://0.0.0.0:27017/IoTBay"); // use the above if this one does not work
@@ -67,9 +88,16 @@ app.use(passport.initialize()); // middleware to initialize Passport
 app.use(passport.session()); // middleware to handle Passport sessions
 app.use(methodOverride("_method")); // middleware for HTTP method overriding
 
+const days_expires = 3;
+
 // GET route to render the landing page
 app.get('/landing', (req, res) => {
+    console.log(req.cookies);
     res.render("landing.ejs");
+});
+
+app.get('/index', (req, res) => {
+    res.render('index.ejs', {'name' : req.cookies.name});
 });
 
 // GET route to render the login page.
@@ -86,7 +114,12 @@ app.get('/', (req, res) => {
 
 // GET route to render the login page. Redirect to '/' if the user is already authenticated.
 app.get('/login', checkNotAuthenticated, (req, res) => {
-    res.render("login.ejs");
+    if (req.cookies.authenticated){
+        res.redirect('/index');
+    }
+    else{
+        res.render("login.ejs");
+    }
 });
 
 // GET route to render the registration page. Redirect to '/' if the user is already authenticated
@@ -100,68 +133,70 @@ app.get('/guest', (req, res) => {
 });
 
 app.get('/shipmentdetails', async (req, res) => {
-    var email = 'test1@gmail.com'
-    var data_exist = await db.collection('Shipment').findOne({ email });
-    
-    try {
-        if (data_exist){
-            console.log(data_exist)
-            // return res.send("Incorrect email");
-            var shipment_details = {
-                'address1': data_exist['address1'],
-                'address2': data_exist['address2'],
-                'postalCode': data_exist['postalCode'],
-                'city': data_exist['city']
-            };
-        }
-        else{
-            var shipment_details = null;
-        }
-        
-        res.json(shipment_details);
-    }
-    catch (error) {
-        console.log(error);
-        return res.send("ERROR OCCURRED");
-    }   
+    console.log(req.cookies);
+    if (req.cookies.authenticated){
 
+        const email = req.cookies.email;
+        var data_exist = await db.collection('Shipment').findOne({ email });
+        
+        try {
+            if (data_exist){
+                console.log(data_exist)
+                // return res.send("Incorrect email");
+                var shipment_details = {
+                    'address1': data_exist['address1'],
+                    'address2': data_exist['address2'],
+                    'postalCode': data_exist['postalCode'],
+                    'city': data_exist['city']
+                };
+            }
+            else{
+                var shipment_details = null;
+            }
+            res.json(shipment_details);
+        }
+        catch (error) {
+            console.log(error);
+            return res.send("ERROR OCCURRED");
+        }   
+    }
 });
 
-app.get('/viewshipment', async (req,res) => {
-    // HOW DO I GET THE USER EMAIL?
-    // For demo purpose, email shall be test2@gmail.com
-    // const { email, password } = req.body;
-    
-    res.render('viewShipment.ejs');
-
+app.get('/viewshipment', (req,res) => {
+    if (!req.cookies.authenticated){
+        return res.redirect('login');
+    }
+    return res.render('viewShipment.ejs');
 });
 
 app.post('/viewshipment', (req, res) => {
-    res.redirect('/editshipment')
+    return res.redirect('/editshipment')
 });
 
 // GET route to render shipment page. Redirect to '/' if user is not authenticated
-app.get('/editshipment', checkNotAuthenticated, (req,res) => {
-    res.render('editShipment.ejs');
+app.get('/editshipment', (req,res) => {
+    if (!req.cookies.authenticated){
+        return res.redirect('login');
+    }
+    return res.render('editShipment.ejs');
 });
 
 app.post('/editshipment', async (req, res) => {
-    var addr1 = req.body.address1;
-    var addr2 = req.body.address2;
-    var postalCode = req.body.postalCode;
-    var city = req.body.city;
+    const addr1 = req.body.address1;
+    const addr2 = req.body.address2;
+    const postalCode = req.body.postalCode;
+    const city = req.body.city;
 
-    var email = 'test2@gmail.com'
-    // console.log(addr1+addr2)
-
-    var shipment_details = {
+    const email = req.cookies.email;
+    
+    const shipment_details = {
         "address1": addr1,
         "address2": addr2,
         "postalCode": postalCode,
         "city": city,
     }
 
-    var check = await db.collection('Shipment').findOne({ email });
+    const check = await db.collection('Shipment').findOne({ email });
     
     if (!check){
         db.collection('Shipment').insertOne(shipment_details,(err,collection)=>{
@@ -185,37 +220,6 @@ app.post('/editshipment', async (req, res) => {
     }
     res.redirect('viewshipment')
 });
-
-
-// POST route for user login. Uses Passport's local authentication strategy.
-// app.post("/login", checkNotAuthenticated, passport.authenticate("local", {
-//     successRedirect: "/",
-//     failureRedirect: "/login",
-//     failureFlash: true
-// }));
-
-// POST route for user registration. Hashes the password before storing it in the 'users' array
-// app.post("/register", checkNotAuthenticated, async (req, res) => {
-//     // try {
-//     //     const hashedPassword = await bcrypt.hash(req.body.password, 10)
-//     //     users.push({
-//     //         id: Date.now().toString(),
-//     //         name: req.body.name,
-//     //         email: req.body.email,
-//     //         password: hashedPassword,
-//     //     })
-//     //     console.log(users);
-//     //     res.redirect("/login")
-
-//     // } catch (e) {
-//     //     console.log(e);
-//     //     res.redirect("/register")
-//     // }
-
-//     var name = req.body.name,
-//     var email = req.body.email,
-//     var password = req.body.password;
-// });
 
 app.post("/register", (req, res) => {
     var name = req.body.name;
@@ -249,63 +253,54 @@ app.post("/register", (req, res) => {
 // verify login
 app.post("/login", async (req, res) => {
 
-    // var name = req.body.name;
-    // const { email, password } = req.body;
-    // const user = await User.findOne({ email });
-    // if (!user) return res.status(400).send("Invalid email or password");
-
-    // const validPassword = await bcrypt.compare(password, user.password);
-    // if (!validPassword) return res.status(400).send("Invalid email or password");
-
     // Assuming successful login, generate JWT token:
-    // res.render('view/index');
     const { email, password } = req.body;
     const check = await db.collection('Users').findOne({ email });
     
+    const messages = { error: "" };
     try {
-        // console.log(check);
         if (!check)
         {
-            // res.render('index.ejs');
-            return res.send("Incorrect email");
+            messages.error = "Incorrect email";
         }
-
+        
         // 03/05 - This additional check is causing it to not proceed any further
         // Error [ERR_HTTP_HEADERS_SENT]: Cannot set headers after they are sent to the client
         // else {
-        //     res.send("Incorrect Password, please try again!");
-        // }
-        
-        const isPasswordMatch = await bcrypt.compare(password, check.hashed);
-
-        if (isPasswordMatch)
-        {
-            res.render("index");
-        }
-        else
-        {
-            res.send("wrong password");
+            //     res.send("Incorrect Password, please try again!");
+            // }
+        else{
+            const isPasswordMatch = await bcrypt.compare(password, check.hashed);
+            
+            if (isPasswordMatch){
+                
+                const date = new Date();
+                date.setTime(date.getTime()+(days_expires*24*60*60*1000));
+                const expire = date.toGMTString()
+                
+                res.cookie('email', email);
+                res.cookie('name', check.name);
+                res.cookie('authenticated', true);
+                
+                return res.redirect("/index");
+            }
+            else{
+                messages.error = "Wrong password!";
+            }
         }
     }
     catch (error) {
+        messages.error = error;
         console.log(error)
-        return res.send("Wrong Details provided");
+        // return res.send("Wrong Details provided");
     }
-
-    // db.collection('Users').insertOne(data,(err,collection)=>{
-    //     if(err)
-    //     {
-    //         throw err;
-    //     }
-    //     console.log("Record inserted successfully");
-    // });
-
-    // res.redirect('/login'); // once data is inserted into the mongodb, redirect user to index.ejs page
+    return res.render("login", { messages });
 });
 
 // DELETE route to log out the user and destroy the session
 app.delete("/logout", (req, res) => {
     req.session.destroy((err) => {
+        clearAllCookieProperty(req, res);
         if (err) {
             return res.redirect("/landing"); // or handle the error as needed
         }
@@ -313,20 +308,23 @@ app.delete("/logout", (req, res) => {
     });
 });
 
-// middleware checkAuthenticated() function to check if the user is authenticated.
-// function checkAuthenticated(req, res, next) {
-//     if (req.isAuthenticated()) {
-//         return next()
-//     }
-//     res.redirect("/login") // Redirect to '/login' if not authenticated
-// }
-
 // middleware checkNotAuthenticated() function to check if the user is not authenticated.
 function checkNotAuthenticated(req, res, next) {
     if (req.isAuthenticated()) {
         return res.redirect("/") // Redirect to '/' if authenticated
     }
     next()
+}
+
+function clearAllCookieProperty(req, res){
+    const cookies = req.cookies;
+    for (const prop in cookies) {
+        if (!cookies.hasOwnProperty(prop)){
+            continue;
+        }
+        // res.cookie(prop, '', {expires: new Date(0)});
+        res.clearCookie(prop);
+    }
 }
 
 // start the Express server on port 3000

@@ -1,11 +1,11 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
+  <head>
     <title>Login</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0-beta1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-0evHe/X+R7YkIZDRvuzKMRqM+OrBnVFBL6DOitfPri4tjfHxaWutUpFmBp4vmVor" crossorigin="anonymous">
     <link href="login.css" rel="stylesheet">
     <link rel="shortcut icon" type="image/png" href="https://www.pngkey.com/png/detail/18-182164_website-symbol-png-clip-art-black-and-white.png">
-
+    <!-- <script type="text/javascript" src="js/cookies.js"></script> -->
 </head>
 <body style="background-image: url('https://images.unsplash.com/photo-1524168948265-8f79ad8d4e33?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D'); background-size: cover; background-position: center;">
     <div class="container mt-4">
@@ -28,7 +28,7 @@
   
           <div class="card bg-glass">
             <div class="card-body px-4 py-5 px-md-5">
-              <form action="/login" method="POST">
+              <form action="/login" id="loginForm" method="POST">
                 <!-- 2 column grid layout with text inputs for the first and last names -->
                 <div class="row">
                   
@@ -54,7 +54,6 @@
                   <label class="form-label text-dark-blue" for="form3Example4">Password</label>
                 </div>
   
-  
                 <!-- Submit button -->
                 <button type="submit" class="btn btn-primary btn-block mb-4">
                   Sign In
@@ -72,7 +71,42 @@
       </div>
     </div>
   </section>
-    </div>
+</div>
+  <script>
+  </script>
+  <!-- const loginForm = document.getElementById('loginForm');
+  loginForm.addEventListener('submit', async (e) =>{
+    const email = document.getElementById('form3Example3').value;
+    const password = document.getElementById('form3Example4').value;
+    e.preventDefault();
+    console.log(email)
+    console.log(password)
+    const res = await fetch('/login', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ email, password }) 
+    });
+    
+    const data = await res.json();
+    
+    console.log(data)
+    if (data.authenticated) {
+      //res.cookie("HELLO", "HEEE");
+      writeCookie('email', data.email, 3);
+      writeCookie('name', data.name, 3);
+      writeCookie('authenticated', data.authenticated, 3);
+      console.log(readCookie('authenticated'));
+      window.location.href = '/index'; // Redirect to dashboard if login successful
+    } 
+    else {
+      writeCookie('authenticated', data.authenticated, 3)
+      console.log("FAILED");
+      
+    //    messageDiv.innerText = data.message; // Show error message if login failed
+    };
+  }); -->
 
 </body>
 </html>

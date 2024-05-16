@@ -7,3 +7,7 @@ Version 0.1 - Juhil
 - use "npm run" to start sever.
 - public folder = files that will be shared to web brower
 - views = pages the user can access
+
+
+Additional modules:
+npm install cookie-parser
