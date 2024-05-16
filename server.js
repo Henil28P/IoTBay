@@ -190,6 +190,7 @@ app.post('/editshipment', async (req, res) => {
     const email = req.cookies.email;
     
     const shipment_details = {
+        "email": email,
         "address1": addr1,
         "address2": addr2,
         "postalCode": postalCode,
