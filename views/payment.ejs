@@ -50,7 +50,7 @@
                 <p><%= paymentMessage %></p>
             <% } else { %>
                 <h2>Payment Details</h2>
-                <form action="/processPayment" method="post">
+                <form action="/processPaymentAndPlaceOrder" method="post">
                     <label for="cardNumber">Card Number:</label>
                     <input type="text" id="cardNumber" name="cardNumber" required><br>
 

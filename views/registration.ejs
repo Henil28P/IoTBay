@@ -1,0 +1,53 @@
+<!-- registration.ejs -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Registration</title>
+    <!-- Local Files -->
+    <link rel="stylesheet" href="css/styles.css" type="text/css">
+
+    <!-- Libraries -->
+</head>
+<body>
+    <h1>User Registration</h1>
+    <div class="navbar">
+        <a href="/index">Home Page</a>
+        <div class="search-container">
+          <form action="/search" method="get">
+            <input type="text" placeholder="Search..." name="search">
+            <button type="submit">Search</button>
+          </form>
+        </div>
+        <a href="/login">Login/Signup</a>
+        <a href="/cart">Cart</a>
+        <a href="/dashboard">dashboard</a>
+      </div>
+    <% if (errorMessage) { %>
+        <p class="error-message"><%= errorMessage %></p>
+    <% } %>
+    <form action="/register" method="POST">
+        <label for="username">Username:</label>
+        <input type="text" id="username" name="username" required><br>
+
+        <label for="email">Email:</label>
+        <input type="email" id="email" name="email" required><br>
+
+        <label for="password">Password:</label>
+        <input type="password" id="password" name="password" required><br>
+
+        <label for="phone">Phone:</label>
+        <input type="tel" id="phone" name="phone"><br>
+
+        <label for="deliveryAddress">Delivery Address:</label>
+        <textarea id="deliveryAddress" name="deliveryAddress" required></textarea><br>
+
+        <button type="submit">Register</button>
+    </form>
+    <% if (registrationSuccess) { %>
+        <p>Registration successful!</p>
+        <a href="/login">Go to Login</a>
+    <% } %>
+</body>
+</html>

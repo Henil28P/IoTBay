@@ -25,18 +25,32 @@
   </div>
   <h1>Welcome <%= user.username %></h1>
 
-  <h2>Email: <%= user.email %></h2>
-  <h2>Phone: <%= user.phone %></h2>
-  <h2>User Type: <%= user.type %></h2>
-  <h2>Delivery Address: <%= user.deliveryAddress %></h2>
+<h2>Email: <%= user.email %></h2>
+<h2>Phone: <%= user.phone %></h2>
+<h2>User Type: <%= user.type %></h2>
+<h2>Delivery Address: <%= user.deliveryAddress %></h2>
 
-  <h2>Order History:</h2>
-  <ul>
-      <% user.orderHistory.forEach(order => { %>
-          <li>Order ID: <%= order.orderId %> - Date: <%= order.date %> - Total: $<%= order.total %></li>
-      <% }) %>
-  </ul>
-
+<h2>Order History:</h2>
+<ul>
+    <% if (user.orderHistory && user.orderHistory.length > 0) { %>
+        <% user.orderHistory.forEach(order => { %>
+            <li>
+                Order ID: <%= order._id %> - Date: <% if (order.orderDate) { %>
+                    <%= order.orderDate.toLocaleString() %>
+                <% } %>
+                <ul>
+                    <% if (order.products) { %>
+                        <% order.products.forEach(product => { %>
+                            <li><%= product.name %> - Quantity: <%= product.quantity %> - Price: $<%= product.price %></li>
+                        <% }) %>
+                    <% } %>
+                </ul>
+            </li>
+        <% }) %>
+    <% } else { %>
+        <li>No orders found.</li>
+    <% } %>
+</ul>
   <h2>Activity Log:</h2>
   <ul>
       <% user.activityLog.forEach(activity => { %>
