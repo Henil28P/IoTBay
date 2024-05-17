@@ -8,19 +8,44 @@
     <!-- Local Files -->
     <link rel="stylesheet" href="css/styles.css" type="text/css">
 </head>
-<body>
-  <h1>Search Results</h1>
+<header>
+  <h1><a href="/index">Search Results</a></h1>
   <div class="navbar">
-    <a href="/index">Home Page</a>
+    <a href="/index">
+      Home
+    </a>
     <div class="search-container">
       <form action="/search" method="get">
         <input type="text" placeholder="Search..." name="search">
-        <button type="submit">Search</button>
+        <button type="submit">
+          <svg xmlns="http://www.w3.org/2000/svg" style="width: 30px; height: 30px" viewBox="0 0 512 512">
+            <path d="M505 442.7L405.3 343c-4.5-4.5-10.6-7-17-7H372c27.6-35.3 44-79.7 44-128C416 93.1 322.9 0 208 0S0 93.1 0 208s93.1 208 208 208c48.3 0 92.7-16.4 128-44v16.3c0 6.4 2.5 12.5 7 17l99.7 99.7c9.4 9.4 24.6 9.4 33.9 0l28.3-28.3c9.4-9.4 9.4-24.6 .1-34zM208 336c-70.7 0-128-57.2-128-128 0-70.7 57.2-128 128-128 70.7 0 128 57.2 128 128 0 70.7-57.2 128-128 128z"/>
+          </svg>
+        </button>
       </form>
     </div>
-    <a href="/login">Login/Signup</a>
-    <a href="/cart">Cart</a>
+    <% if (!user) { %>
+      <a href="/login">
+        Login
+      </a>
+    <% } else { %>
+      <a href="/logout">
+        Logout
+      </a>
+    <% } %>
+    <a href="/cart">
+    <svg xmlns="http://www.w3.org/2000/svg" style="width: 50px; height: 50px" viewBox="0 0 576 512">
+      <path d="M528.1 301.3l47.3-208C578.8 78.3 567.4 64 552 64H159.2l-9.2-44.8C147.8 8 137.9 0 126.5 0H24C10.7 0 0 10.7 0 24v16c0 13.3 10.7 24 24 24h69.9l70.2 343.4C147.3 417.1 136 435.2 136 456c0 30.9 25.1 56 56 56s56-25.1 56-56c0-15.7-6.4-29.8-16.8-40h209.6C430.4 426.2 424 440.3 424 456c0 30.9 25.1 56 56 56s56-25.1 56-56c0-22.2-12.9-41.3-31.6-50.4l5.5-24.3c3.4-15-8-29.3-23.4-29.3H218.1l-6.5-32h293.1c11.2 0 20.9-7.8 23.4-18.7z"/>
+    </svg>
+    </a>
+    <% if (user) { %>
+      <a href="/dashboard">
+        Dashboard
+      </a>
+    <% } %>
   </div>
+</header>
+<body>
   <ul>
     <% searchResults.forEach(product => { %>
       <li>

@@ -57,7 +57,7 @@ async function connectToDB() {
     // Render index page with products
     app.get('/', (req, res) => {
       try {
-        res.render('index', { products });
+        res.render('index', { products, user: req.session.userId });
       } catch (error) {
         console.log('Error in fetching products:', error);
         res.status(500).send('Error in fetching products');
@@ -67,7 +67,7 @@ async function connectToDB() {
     // Alias route for index
     app.get('/index', (req, res) => {
       try {
-        res.render('index', { products });
+        res.render('index', { products, user: req.session.userId });
       } catch (error) {
         console.log('Error in fetching products:', error);
         res.status(500).send('Error in fetching products');
@@ -77,7 +77,8 @@ async function connectToDB() {
     // Render login page
     app.get('/login', function(req, res){
       try {
-        res.render('login');
+        const errorMessage = req.session.errorMessage || '';
+        res.render('login', {user: req.session.userId, errorMessage});
       } catch (error) {
         console.log('Error in login loading:', error);
         res.status(500).send('Error in login loading');
@@ -89,19 +90,19 @@ async function connectToDB() {
       const { username, password } = req.body;
       const user = await usersCollection.findOne({ username, password });
       if (!user) {
-        res.send('Invalid username or password');
+        res.render('login', {user: req.session.userId, errorMessage: 'Invalid username or password' });
       } else {
         const loginMessage = `User logged in at ${new Date().toLocaleString()}`;
         await usersCollection.updateOne({ _id: user._id }, { $push: { activityLog: loginMessage } });
         req.session.userId = user._id;
-        res.redirect('/dashboard');
+        res.redirect(302, '/dashboard');
       }
     });
 
     // Render cart page with session cart data
     app.get('/cart', function(req, res){
       try {
-        res.render('cart', { cart: req.session.cart, products: products });
+        res.render('cart', { cart: req.session.cart, products: products, user: req.session.userId });
       } catch (error) {
         console.log('Error in cart loading:', error);
         res.status(500).send('Error in cart loading');
@@ -139,7 +140,7 @@ async function connectToDB() {
             return;
           }
           // Redirect the user to the login page or any other appropriate page
-          res.redirect('/login');
+          res.redirect(302, '/login');
         });
       } catch (error) {
         console.error('Error in logout:', error);
@@ -198,18 +199,38 @@ async function connectToDB() {
         }
 
         // Redirect to index page after adding to cart
-        res.redirect('/index');
+        res.redirect(302, '/index');
       } catch (error) {
         console.error('Error in adding product to cart:', error);
         return res.status(500).send('Error in adding product to cart');
       }
     });
 
+    // Handle removing products from cart
+    app.post('/removeFromCart', (req, res) => {
+      try {
+        const productIdToRemove = req.body.productId;
+        
+        // Check if the productIdToRemove is in the session cart
+        if (req.session.cart && req.session.cart[productIdToRemove]) {
+          // Remove the product from the session cart
+          delete req.session.cart[productIdToRemove];
+          res.redirect(302, '/cart'); // Redirect back to the cart page
+        } else {
+          res.status(404).send('Product not found in cart');
+        }
+      } catch (error) {
+        console.error('Error removing product from cart:', error);
+        res.status(500).send('Error removing product from cart');
+      }
+    });
+
+
     // Render payment page
     app.get('/payment', function(req, res){
       try {
         // Render the payment page with products and paymentMessage
-        res.render('payment', { products: products, paymentMessage: req.session.paymentMessage });
+        res.render('payment', { products: products, paymentMessage: req.session.paymentMessage, user: req.session.userId });
       } catch (error) {
         console.log('Error in rendering payment page:', error);
         res.status(500).send('Error in rendering payment page');
@@ -273,7 +294,17 @@ app.post('/processPaymentAndPlaceOrder', async (req, res) => {
         { _id: new ObjectId(userId) },
         { $push: { orderHistory: order } }
       );
+      
 
+      // Update product stock
+      for (const productId in cart) {
+        const quantity = cart[productId];
+        const product = await ProductsCollection.findOne({ _id: new ObjectId(productId) });
+        if (product) {
+            const updatedStock = product.DeviceStock - quantity;
+            await ProductsCollection.updateOne({ _id: new ObjectId(productId) }, { $set: { DeviceStock: updatedStock } });
+        }
+    }
       // Clear session cart after placing order
       req.session.cart = {};
 
@@ -285,7 +316,7 @@ app.post('/processPaymentAndPlaceOrder', async (req, res) => {
     }
 
     // Redirect to payment page
-    res.redirect('/payment');
+    res.redirect(302, '/payment');
   } catch (error) {
     console.error('Error processing payment and placing order:', error);
     res.status(500).send('Error processing payment and placing order');
@@ -297,7 +328,7 @@ app.post('/processPaymentAndPlaceOrder', async (req, res) => {
       try {
         const searchTerm = req.query.search;
         const searchResults = await ProductsCollection.find({ DeviceName: new RegExp(searchTerm, 'i') }).toArray();
-        res.render('search', { searchResults });
+        res.render('search', { searchResults, user: req.session.userId });
       } catch (error) {
         console.error('Error in search:', error);
         res.status(500).send('Error in search');
@@ -311,7 +342,7 @@ app.post('/processPaymentAndPlaceOrder', async (req, res) => {
         
         if (!userId) {
           // If user ID is not found in session, redirect to login page
-          return res.redirect('/login');
+          return res.redirect(302, '/login');
         }
 
         const user = await usersCollection.findOne({ _id: new ObjectId(userId) }); // Find user based on ID
@@ -319,11 +350,11 @@ app.post('/processPaymentAndPlaceOrder', async (req, res) => {
         if (!user) {
           // If user is not found in the database, display a message and redirect to login page
           req.session.errorMessage = 'User not found. Please log in again.';
-          return res.redirect('/login');
+          return res.redirect(302, '/login');
         }
 
         // If user is found, render the dashboard page with user data
-        res.render('dashboard', { user, products });
+        res.render('dashboard', { user, products});
       } catch (error) {
         console.error('Error in fetching user data:', error);
         res.status(500).send('Error in fetching user data');
@@ -332,7 +363,7 @@ app.post('/processPaymentAndPlaceOrder', async (req, res) => {
     // Define a route to render the registration page
     app.get('/registration', (req, res) => {
       try {
-        res.render('registration', { errorMessage: null, registrationSuccess: null });
+        res.render('registration', { errorMessage: null, registrationSuccess: null, user: req.session.userId});
       } catch (error) {
         console.error('Error rendering registration page:', error);
         res.status(500).send('Error rendering registration page');
@@ -347,7 +378,7 @@ app.post('/processPaymentAndPlaceOrder', async (req, res) => {
         // Check if username or email already exists
         const existingUser = await usersCollection.findOne({ $or: [{ username }, { email }] });
         if (existingUser) {
-          return res.render('registration', { errorMessage: 'Username or email already exists', registrationSuccess: null });
+          return res.render('registration', {user: req.session.userId, errorMessage: 'Username or email already exists', registrationSuccess: null });
         }
 
         // Create a new user document
@@ -364,7 +395,7 @@ app.post('/processPaymentAndPlaceOrder', async (req, res) => {
 
         // Insert the new user document into the database
         const result = await usersCollection.insertOne(newUser);
-        return res.render('registration', {errorMessage: '', registrationSuccess: true });
+        return res.render('registration', {user: req.session.userId, errorMessage: '', registrationSuccess: true });
       } catch (error) {
         console.error('Error registering user:', error);
         res.status(500).send('Error registering user');
