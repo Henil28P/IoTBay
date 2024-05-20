@@ -1,0 +1,19 @@
+.bg-glass {
+    background-color: hsla(0, 0%, 100%, 0.9) !important;
+    backdrop-filter: saturate(200%) blur(25px);
+}
+
+.text-dark-blue {
+    color: #1a237e;
+}
+
+.shift-right {
+    padding-left: 80px;
+}
+
+.move-up {
+    margin-top: -40px; 
+}
+.shift-up{
+    padding-bottom: 50px;
+}

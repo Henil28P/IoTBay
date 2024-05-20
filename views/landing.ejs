@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="shortcut icon" type="image/png" href="https://www.pngkey.com/png/detail/18-182164_website-symbol-png-clip-art-black-and-white.png">
+    <title>Landing Page</title>
+    <style>
+        body {
+            background-image: url('https://images.unsplash.com/photo-1604011237320-8e0506614fdf?q=80&w=2104&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D');
+            background-size: cover; /* Background image */
+            background-position: center; 
+            color: white; 
+            font-family: Arial, sans-serif; 
+            margin: 0; 
+            padding: 0; 
+        }
+        .container {
+            text-align: center; 
+            padding-top: 10px; 
+            padding-bottom: 10px;
+            background-color: rgba(0, 0, 0, 0.6); /* Transparent layer */
+            width: 100%;
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            box-sizing: border-box; 
+        }
+        h1 {
+            font-size: 48px; 
+        }
+        .content {
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            flex-wrap: wrap; 
+            margin-bottom: 30px; 
+        }
+        img {
+            max-width: 200px; 
+            margin-left: 10px;
+        }
+        ul {
+            list-style-type: none; 
+            padding: 0; 
+            display: flex; 
+            justify-content: center; 
+        }
+        li {
+            margin: 0 10px; 
+        }
+        a {
+            text-decoration: none;
+            color: white;
+            padding: 10px 20px;
+            border: 1px solid white;
+            border-radius: 5px;
+            width: 180px;
+            height: 50px;
+            display: flex; 
+            justify-content: center; 
+            align-items: center; 
+            text-align: center;
+            box-sizing: border-box;
+                line-height: 1; 
+        }
+        a:hover {
+            background-color: white; 
+            color: #1a237e; 
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="content">
+            <h1>Welcome to </h1>
+            <img src='https://i.postimg.cc/bGgh8Fk2/Iot-Bay-white.png' border='0' alt='Iot-Bay-white'/>
+        </div>
+        <p>Please select an option to continue:</p>
+        <ul>
+            <li><a href="/login">Login</a></li>
+            <li><a href="/register">Register</a></li>
+            <li><a href="/guest">Continue as Guest</a></li>
+        </ul>
+    </div>
+</body>
+</html>

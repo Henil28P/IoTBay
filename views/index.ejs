@@ -1,20 +1,177 @@
-<!-- views/index.ejs -->
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="h-100">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Index</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0-beta1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-0evHe/X+R7YkIZDRvuzKMRqM+OrBnVFBL6DOitfPri4tjfHxaWutUpFmBp4vmVor" crossorigin="anonymous">
+    <link rel="shortcut icon" type="image/png" href="https://www.pngkey.com/png/detail/18-182164_website-symbol-png-clip-art-black-and-white.png">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" integrity="sha512-SnH5WK+bZxgPHs44uWIX+LLJAJ9/2PkPKZ5QiAj6Ta86w+fsb2TkcmfRyVX3pBnMFcV7oQPJkl9QevSCWr3W6A==" crossorigin="anonymous" referrerpolicy="no-referrer" />
 
-    <!-- Local Files -->
-    <link rel="stylesheet" href="/css/main.css" type="text/css">
+    <style>
+        body {
+            background: url("https://assets-global.website-files.com/5e4bb125419b3343f60a3c85/648bcefcbe88fa270a37842b_Learn%20header%20image%20(3).png");
+            background-size: cover;
+            background-position: center;
+        }
 
-    <!-- Libraries -->
+        .iot-product {
+            width: 450px;
+            height: 600px;
+            background-color: #f8f9fa;
+            margin: 10px;
+            margin-top: 100px;
+            /*margin-bottom: 250px;*/
+            display: inline-block;
+            position: relative;
+            border-radius: 10px;
+            color: darkblue;
+            padding-top: 10px;
+            padding-bottom: 180px;
+        }
+
+        .product-image {
+            width: 90%;
+            height: 90%;
+            object-fit:contain;
+            border-radius: 10px;
+        }
+
+        .product-description, .product-name, .product-price, .product-quantity {
+            /*position:static;*/
+            bottom: 10px;
+            width: 100%;
+            left: 50%;
+            object-fit: contain;
+            /* transform: translateX(-50%); */
+            color: darkblue;
+        }
+
+        .add-to-cart {
+            /*position: static;*/
+            bottom: 10px;
+            width: 110px;
+            left: 50%;
+            /* transform: translateX(-50%); */
+        }
+
+        .header {
+            background-color: white;
+            width: 100%;
+            padding: 10px;
+            position: fixed;
+            top: 0;
+            left: 0;
+            z-index: 1000;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .container {
+            margin-top: -40px; 
+        }
+
+        .search-icon {
+            width: 30px; 
+            height: auto; 
+            margin-left: 5px; 
+            margin-right: 15px;
+        }
+
+        .custom-btn {
+            width: 90px; 
+            margin-right: 10px; 
+        }
+
+        /* Added CSS for vertical centering */
+        .logout-container {
+            display: flex;
+            align-items: center;
+        }
+    </style>
 
 </head>
-<body>
+<body class="d-flex h-100 text-center text-white bg-white">
+<div class="container d-flex w-100 h-100 p-3 mx-auto flex-column">
+    <header class="mb-auto">
+        <div class="header">
+            <div>
+                <!-- Logo -->
+                <img src="https://i.postimg.cc/wvZDbKXP/Io-TBay-Black.png" border="0" alt="Iot-Bay-white" width="120"/>
+            </div>
 
-  <!-- JS Scripts-->
-  <script src="/js/login.js"></script>
+            <div style="color: black; float: left; transform: translateX(-80%);">
+                <i class="fa fa-search" style="position: relative;"></i>
+                <input type="text" placeholder="Search...">
+            </div>
+
+            <h1 class="text-dark" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);">Hello <%= userName %></h1>
+            <div class="nav">
+                <!-- Buttons -->
+                <a class="nav-link" href="/index">Browse Catalogue</a>
+                <a class="nav-link" href="/orders">Orders</a>
+                <a class="nav-link" href="/viewSaved">Dashboard</a>
+                <div class="d-flex align-items-center">
+                    <a class="nav-link" href="#">Shipment</a>
+                    <a href="/cart"><img src="https://cdn-icons-png.flaticon.com/512/263/263142.png" alt="Search Icon" class="search-icon"></a>
+                </div>
+                <div class="logout-container">
+                    <form action="/logout?_method=DELETE" method="POST">
+                        <button class="nav-link fw-bold py-1 px-0 btn p=3 btn-primary text-white custom-btn" type="submit">Logout</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+        
+    </header>
+
+    <main id="products-container" class="px-3 d-flex justify-content-center align-items-center flex-wrap" style="height: calc(200vh - 120px);">
+        <!-- <img src="https://m.media-amazon.com/images/I/71FPUaOidqL.jpg"> -->
+        <!-- <%
+            // Array of product images
+            const productImages = [
+                "https://m.media-amazon.com/images/I/71FPUaOidqL.jpg",
+                "https://m.media-amazon.com/images/I/51KKngVOP4L._AC_UF894,1000_QL80_DpWeblab_.jpg",
+                "https://m.media-amazon.com/images/I/51c0kM3pr2L._AC_UF1000,1000_QL80_.jpg",
+                "https://m.media-amazon.com/images/I/51S-k45+MfL._AC_UF1000,1000_QL80_.jpg",
+                "https://m.media-amazon.com/images/I/71r5Lm1aO1L.jpg",
+                "https://via.placeholder.com/200",
+                "https://via.placeholder.com/200",
+                "https://via.placeholder.com/200",
+                "https://via.placeholder.com/200",
+            ];
+            /*
+            const productImage = document.createElement("img");
+            productImage.classList.add("product-image");
+            productImage.src = imageUrl;
+            productImage.alt = "Product";
+            */
+        %> -->
+        <!-- <img src="imageUrl" alt="Product" class="product-image"> -->
+
+        <!-- <% productImages.forEach(image => { %> -->
+            
+        <!-- <% }) %> -->
+    </main>
+
+    <% products.forEach(product => { %>
+        <% if (product.DeviceStock > 0) { %>
+            <main id="products-container" class="px-3 d-flex justify-content-center align-items-center flex-wrap" style="height: calc(200vh - 120px);">
+                <div class="iot-product">
+                    <img src="https://m.media-amazon.com/images/I/71r5Lm1aO1L.jpg" class="product-image" alt="Product"/>
+                    <h2 class="product-name"><%= product.DeviceName %></h2>
+                    <p class="product-description">Manufacturer: <%= product.DeviceManufacturer %></p>
+                    <h4 class="product-price">Price: <%= product.DevicePrice %></h4>
+                    <h5 class="product-quantity">Quantity: <%= product.DeviceStock %></h5>
+                    <!-- <button class="add-to-cart btn btn-primary">Add to Cart</button> -->
+                    <form action="/addToCart" method="post">
+                        <input type="hidden" name="productId" value="<%= product._id %>">
+                        <input type="number" name="quantity" value="1" min="1">
+                        <button class="add-to-cart btn btn-primary" type="submit">Add to Cart</button>
+                    </form>
+                </div>
+            </main>
+        <% } %>
+    <% }) %>
+</div>
+
 </body>
 </html>
